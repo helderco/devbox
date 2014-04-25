@@ -1,0 +1,101 @@
+{
+    "variables": {
+        "hostname": "devbox",
+        "username": "vagrant",
+        "password": "vagrant"
+    },
+    "builders": [
+        {
+            "type": "vmware-iso",
+            "vm_name": "vagrant-precise64",
+            "vmdk_name": "vagrant",
+            "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso",
+            "iso_checksum": "3aeb42816253355394897ae80d99a9ba56217c0e98e05294b51f0f5b13bceb54",
+            "iso_checksum_type": "sha256",
+            "guest_os_type": "ubuntu-64",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+                "auto locale=en_US kbd-chooser/method=pt ",
+                "hostname={{user `hostname`}} ",
+                "fb=false debconf/frontend=noninteractive ",
+                "console-setup/ask_detect=false keyboard-configuration/modelcode=pc105 keyboard-configuration/layoutcode=pt keyboard-configuration/variantcode=mac ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "http_directory": "http",
+            "shutdown_command": "echo '{{user `password`}}' | sudo -S shutdown -P now",
+            "ssh_wait_timeout": "20m",
+            "ssh_username": "{{user `username`}}",
+            "ssh_password": "{{user `password`}}",
+            "tools_upload_flavor": "linux"
+        },
+        {
+            "type": "virtualbox-iso",
+            "vm_name": "vagrant-precise64",
+            "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso",
+            "iso_checksum": "3aeb42816253355394897ae80d99a9ba56217c0e98e05294b51f0f5b13bceb54",
+            "iso_checksum_type": "sha256",
+            "guest_os_type": "Ubuntu_64",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+                "auto locale=en_US kbd-chooser/method=pt ",
+                "hostname={{user `hostname`}} ",
+                "fb=false debconf/frontend=noninteractive ",
+                "console-setup/ask_detect=false keyboard-configuration/modelcode=pc105 keyboard-configuration/layoutcode=pt keyboard-configuration/variantcode=mac ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "http_directory": "http",
+            "shutdown_command": "echo '{{user `password`}}' | sudo -S shutdown -P now",
+            "ssh_wait_timeout": "20m",
+            "ssh_username": "{{user `username`}}",
+            "ssh_password": "{{user `password`}}",
+            "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+            "virtualbox_version_file": ".vbox_version"
+        }
+    ],
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/upgrade.sh",
+                "scripts/vagrant.sh"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/fusion.sh",
+            "only": [
+                "vmware-iso"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/virtualbox.sh",
+            "only": [
+                "virtualbox-iso"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/vm_cleanup.sh"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        }
+    ],
+
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "output": "vagrant-{{.Provider}}-precise-amd64.box",
+            "keep_input_artifact": false
+        }
+    ]
+}

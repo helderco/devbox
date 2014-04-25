@@ -7,15 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define :devbox do |node|
-    # Ubuntu 12.04.03
-    node.vm.box = "dev"
-
-    node.vm.provider :vmware_fusion do |vmware, override|
-      override.vm.box_url = "http://files.siriux.org/vagrant-vmware-precise.box"
-    end
-    node.vm.provider :virtualbox do |virtualbox, override|
-      override.vm.box_url = "http://files.siriux.org/vagrant-virtualbox-precise.box"
-    end
+    node.vm.box = "helderco/develop"
 
     # Network
     node.vm.hostname = "devbox.local"

@@ -4,7 +4,7 @@ apt-get install -y lxc redir btrfs-tools apparmor-utils linux-image-generic linu
 sudo aa-complain /usr/bin/lxc-start
 
 # Install vagrant
-wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.2_x86_64.deb -O /tmp/vagrant.deb -q
+wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.5.4_x86_64.deb -O /tmp/vagrant.deb -q
 dpkg -i /tmp/vagrant.deb && rm /tmp/vagrant.deb
 
 # Install the lxc provider
