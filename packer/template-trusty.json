@@ -1,0 +1,107 @@
+{
+    "variables": {
+        "hostname": "trusty64",
+        "username": "vagrant",
+        "password": "vagrant"
+    },
+    "builders": [
+        {
+            "type": "vmware-iso",
+            "vm_name": "vagrant-trusty64",
+            "vmdk_name": "vagrant",
+            "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04-server-amd64.iso",
+            "iso_checksum": "ababb88a492e08759fddcf4f05e5ccc58ec9d47fa37550d63931d0a5fa4f7388",
+            "iso_checksum_type": "sha256",
+            "guest_os_type": "ubuntu-64",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+                "auto locale=en_US kbd-chooser/method=pt ",
+                "hostname={{user `hostname`}} ",
+                "fb=false debconf/frontend=noninteractive ",
+                "console-setup/ask_detect=false keyboard-configuration/modelcode=pc105 keyboard-configuration/layoutcode=pt keyboard-configuration/variantcode=mac ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "http_directory": "http",
+            "shutdown_command": "echo '{{user `password`}}' | sudo -S shutdown -P now",
+            "ssh_wait_timeout": "20m",
+            "ssh_username": "{{user `username`}}",
+            "ssh_password": "{{user `password`}}",
+            "tools_upload_flavor": "linux"
+        },
+        {
+            "type": "virtualbox-iso",
+            "vm_name": "vagrant-trusty64",
+            "iso_url": "http://releases.ubuntu.com/trusty/ubuntu-14.04-server-amd64.iso",
+            "iso_checksum": "ababb88a492e08759fddcf4f05e5ccc58ec9d47fa37550d63931d0a5fa4f7388",
+            "iso_checksum_type": "sha256",
+            "guest_os_type": "Ubuntu_64",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+                "auto locale=en_US kbd-chooser/method=pt ",
+                "hostname={{user `hostname`}} ",
+                "fb=false debconf/frontend=noninteractive ",
+                "console-setup/ask_detect=false keyboard-configuration/modelcode=pc105 keyboard-configuration/layoutcode=pt keyboard-configuration/variantcode=mac ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "http_directory": "http",
+            "shutdown_command": "echo '{{user `password`}}' | sudo -S shutdown -P now",
+            "ssh_wait_timeout": "20m",
+            "ssh_username": "{{user `username`}}",
+            "ssh_password": "{{user `password`}}",
+            "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+            "virtualbox_version_file": ".vbox_version"
+        }
+    ],
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "apt-get update && apt-get upgrade -y"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/vagrant.sh"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/fusion.sh",
+            "only": [
+                "vmware-iso"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/virtualbox.sh",
+            "only": [
+                "virtualbox-iso"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/vm_cleanup.sh"
+            ],
+            "execute_command": "echo '{{user `password`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        }
+    ],
+
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "output": "vagrant-{{.Provider}}-trusty-amd64.box",
+            "keep_input_artifact": false
+        }
+    ]
+}
