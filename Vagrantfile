@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Network
     node.vm.hostname = "devbox.local"
     # node.vm.network :public_network
-    node.vm.network :private_network, ip: "10.10.10.10"
+    node.vm.network :private_network, ip: "172.40.0.100"
     #node.vm.network :forwarded_port, guest: 80, host: 80
     node.ssh.forward_agent = true
 
